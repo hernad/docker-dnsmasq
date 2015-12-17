@@ -19,14 +19,14 @@ func main() {
 	log.SetPrefix("[agentd] ")
 	//restore initial config
 	config, _ = ioutil.ReadFile("/etc/dnsmasq.conf")
-	if err := exec.Command("service", "dnsmasq", "restart").Run(); err != nil {
+	if err := exec.Command("docker", "restart", "dnsmasq").Run(); err != nil {
 		log.Printf("initial dnsmasq restart failed: %s", err)
 	}
 	//serve
 	http.HandleFunc("/configure", configure)
 	http.Handle("/", http.FileServer(http.Dir("static")))
-	log.Println("Running dnsmasq agent on 8080")
-	http.ListenAndServe(":8080", nil)
+	log.Println("Running dnsmasq agent on 8553")
+	http.ListenAndServe(":8553", nil)
 }
 
 var rootuser = regexp.MustCompile(`(^|\n)user=root\n`)
@@ -93,7 +93,7 @@ func load(newConfig []byte) error {
 
 	//config validated, reload dnsmasq
 	log.Println("restarting...")
-	if out, err := exec.Command("service", "dnsmasq", "restart").CombinedOutput(); err != nil {
+	if out, err := exec.Command("docker", "restart", "dnsmasq").CombinedOutput(); err != nil {
 		log.Printf("reload failed: %s", out)
 		return parseError(out, err)
 	}
